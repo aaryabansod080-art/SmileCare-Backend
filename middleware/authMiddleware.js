@@ -1,0 +1,34 @@
+import jwt from "jsonwebtoken";
+
+const auth = (req, res, next) => {
+    try {
+
+        const authHeader = req.header("Authorization");
+
+        if (!authHeader) {
+            return res.status(401).json({
+                message: "No token, access denied"
+            });
+        }
+
+        // Remove "Bearer " from the token
+        const token = authHeader.startsWith("Bearer ")
+            ? authHeader.slice(7)
+            : authHeader;
+        console.log("JWT_SECRET =", process.env.JWT_SECRET);
+        console.log("TOKEN =", token);
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        req.user = decoded;
+
+        next();
+
+    } catch (error) {
+        return res.status(401).json({
+            message: "Invalid Token"
+        });
+    }
+};
+
+export default auth;
